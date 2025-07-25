@@ -173,7 +173,7 @@ impl Violation for PyConFunctionWithoutReturnDefinition {
 
 pub(crate) fn pycon_function_without_return_definition(checker: &Checker, name : &Identifier, returns : &Option<Box<Expr>>) {
 
-    if name != "cls" && name != "self" && returns.is_none() {
+    if name != "__init__" && name != "__del__" && returns.is_none() {
 
         checker.report_diagnostic(Diagnostic::new(PyConFunctionWithoutReturnDefinition {}, name.range()));
 
