@@ -37,7 +37,7 @@ class TypingChecker(BaseChecker):
 
                 for name in node.names:
 
-                    if name[0] == "DeprecatedImport":
+                    if name[0] == "DeprecatedClass":
 
                         self.add_message("pycon-deprecated-import", node = node)
 

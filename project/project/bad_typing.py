@@ -26,7 +26,7 @@ class AnotherSomeFunctions:
 
         return ""
 
-    def method_5(self, cls, e : str) -> bool:
+    def method_5(self, e : str) -> bool:
 
         return False
 
