@@ -1,0 +1,85 @@
+0. Требования
+
+0.1 Установленный python
+0.2 Установленный rust с cargo
+0.3 Открытая консоль
+
+1. Подготовка
+
+1.1 mkdir pycon
+1.2 cd pycon
+1.3 mkdir envs
+1.4 python -m venv envs/pycon
+1.5 source envs/pycon/bin/activate
+1.6 ls
+
+2. Проект
+
+2.1 git clone https://github.com/verzhak/pycon2025
+2.2 cd project
+2.3 pip install -e .
+2.4 Смотрим файлы проекта
+2.5 cd ..
+
+3. PyLint
+
+3.1 pip install pylint
+3.2 mkdir -p pylint/pycon
+3.3 cd pylint
+3.4 Редактируем pyproject.toml
+3.5 Редактируем pycon/__init__.py и pycon/plugin.py
+3.6 pip install -e .
+3.7 cd ..
+3.8 python -m pylint -E -d no-member --unsafe-load-any-extension=y --extension-pkg-allow-list=typing --load-plugins pycon.plugin project/project
+
+4. Ruff
+
+4.1 git clone --branch 0.11.8 https://github.com/astral-sh/ruff.git
+4.2 cd ruff
+4.3 git switch -c pycon
+4.4 Обсуждаем, какие ошибки реализуем (исходя из плагина для pylint):
+
+"E9001" : ( "Deprecated import", "pycon-deprecated-typing-import", "Deprecated import" ),
+"E9002" : ( "Deprecated import", "pycon-deprecated-import", "Deprecated import" ),
+"E9003" : ( "Args without type", "pycon-args-without-type", "Args without type" ),
+"E9004" : ( "Function without return definition", "pycon-function-without-return-definition", "Function without return definition" ),
+"E9100" : ( "AttributeError", "pycon-deprecated-attribute-error", "AttributeError is a deprecated replacement for cached_property" ),
+
+4.5 Создаем crate:
+
+crates/ruff_linter/src/rules/pylint/rules/pycon.rs
+
+Последовательность:
+
+"E9100" : ( "AttributeError", "pycon-deprecated-attribute-error", "AttributeError is a deprecated replacement for cached_property" ),
+"E9002" : ( "Deprecated import", "pycon-deprecated-import", "Deprecated import" ),
+"E9001" : ( "Deprecated import", "pycon-deprecated-typing-import", "Deprecated import" ),
+"E9003" : ( "Args without type", "pycon-args-without-type", "Args without type" ),
+"E9004" : ( "Function without return definition", "pycon-function-without-return-definition", "Function without return definition" ),
+
+4.6 Добавляем crate в mod.rs:
+
+crates/ruff_linter/src/rules/pylint/rules/mod.rs
+
+4.7 Добавляем вызовы в обход AST:
+
+crates/ruff_linter/src/checkers/ast/analyze/statement.rs
+
+4.8 Добавляем коды правил в codes.rs и schema:
+
+crates/ruff_linter/src/codes.rs
+ruff.schema.json
+
+4.9 Пробуем собрать:
+
+cargo build
+
+4.10 Запускаем:
+
+cargo run -- check --preview --ignore ALL --select PLE9100,PLE9001,PLE9002,PLE9003,PLE9004 --no-cache ../project/project
+
+4.11 Собираем и запускаем оптимизированную версию:
+
+cargo build --release
+target/release/ruff check --preview --ignore ALL --select PLE9100,PLE9001,PLE9002,PLE9003,PLE9004 --no-cache ../project/project
+
