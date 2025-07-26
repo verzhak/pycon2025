@@ -2,6 +2,10 @@
 from typing import TYPE_CHECKING
 
 from astroid import nodes
+try:
+    from astroid import node_classes
+except ImportError:
+    from astroid.nodes import node_classes
 from pylint.checkers import BaseChecker
 
 if TYPE_CHECKING:
@@ -62,14 +66,9 @@ class ExceptionsChecker(BaseChecker):
     }
 
     def visit_excepthandler(self, node : nodes.ExceptHandler) -> None:
-
-        if isinstance(node.type, nodes.node_classes.Name):
-
-            match node.type.name:
-
-                case "AttributeError":
-
-                    self.add_message("pycon-deprecated-attribute-error", node = node)
+        match node.type:
+            case node_classes.Name(name="AttributeError"):
+                self.add_message("pycon-deprecated-attribute-error", node=node)
 
 def register(linter : "PyLinter") -> None:
 
